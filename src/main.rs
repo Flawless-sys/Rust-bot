@@ -1,3 +1,27 @@
+use std::{collections::HashMap, thread::AccessError};
+use serde;
+use serde::{Deserialize, Serialize};
+use::serde_json::{Value};
+use reqwest::header::{HeaderMap, HeaderValue, USER_AGENT};
+use std::time::SystemTime;
+
+// {
+//     "operationName": "setPixel",
+//     "variables": [
+//         "input": [
+//             "actionName": "r/replace:set_pixel",
+//             "PixelMessageData": [
+//                 "coordinate": ["x": {x}, "y": y],
+//                 "colorIndex": color_index_in,
+//                 "canvasIndex": canvas_index,
+//             ],
+//         ]
+//     ],
+//     "query": ""
+// }
+
+
+
 
 struct Pixel {
     x: u32,
@@ -5,26 +29,49 @@ struct Pixel {
     color: u8
 }
 
-struct Map {
+#[derive(Debug, Deserialize, Clone)]
+    // "{\"access_token\": \"470131870547-TOKEN\", \"token_type\": \"bearer\", \"expires_in\": 3600, \"scope\": \"*\"}"
 
+struct TokenResponse {
+    error: Option<String>,
+    access_token: Option<String>,
+    token_type: Option<String>,
+    expires_in: Option<u32>,
+    scope: Option<String>,
 }
 
+
+#[derive(Clone)]
 struct Worker {
     token: String, // the refesh token
+    refreshin: usize,
+
     username: String, // Reddit username
     password: String, // Reddit Password
+    proxy: String,
 
     client_id: String,  // Reddit developer ID
     secret_key: String, // Reddit developer secret
     place_in: usize, // The unix time
+
+    // workers: HashMap<String, String>,
 }
 
+
+#[derive(Debug, Serialize, Deserialize)]
+struct Account {
+    grant_type: String,
+    username: String,
+    password: String,
+}
 
 impl Worker {
     pub fn new(
         token: String, 
         username: String,
         password: String,
+        proxy: String,
+        refreshin: usize,
 
         client_id: String,
         secret_key: String,
@@ -36,13 +83,53 @@ impl Worker {
             token: token, 
             username: username,
             password: password,
+            proxy: proxy,
+            refreshin: refreshin,
 
             client_id: client_id,
             secret_key: secret_key,
             place_in: place_in,
+
         }
 
     }
+
+    async fn place_pixel(&mut self, x: u16, y: u16, color_index: u8) -> Result<(), Box<dyn std::error::Error>> {
+       
+
+        Ok(())
+    }
+    
+
+    async fn refresh_token(mut self) -> Result<(TokenResponse), Box<dyn std::error::Error>> {
+        let client = reqwest::Client::new();
+    
+        let user = Account {
+            grant_type: String::from("password"),
+            username: self.username.into(),
+            password: self.password.into(),
+        };
+        
+        let resp = client
+            .post("https://ssl.reddit.com/api/v1/access_token")
+            .header("User-Agent", "chrome")
+            .header("content-type", "application/x-www-form-urlencoded")
+            .form(&user)
+            .basic_auth(self.client_id, Some(self.secret_key))
+            .send()
+            .await?;
+
+        // "{\"access_token\": \"470131870547-JRCq3uYGdv8zgeSfwlgQMpcXc3OWCg\", \"token_type\": \"bearer\", \"expires_in\": 3600, \"scope\": \"*\"}"
+        let js: TokenResponse = resp.json().await?;
+
+        self.token = js.access_token.clone().unwrap();
+
+        Ok(js)
+    
+    }
+
+
+
 }
 
 
@@ -55,7 +142,12 @@ impl Pixel {
         }
     }
 
-    pub fn format_into_json(self,) {
+
+    pub fn place_pixel(self) {
+
+    }
+
+    pub fn format_into_json(self) {
         // For reddit to place
     }
 
@@ -85,46 +177,15 @@ impl Pixel {
 
 
 
-// color_map = {
-//     "#FF4500": 2,  # bright red
-//     "#FFA800": 3,  # orange
-//     "#FFD635": 4,  # yellow
-//     "#00A368": 6,  # darker green
-//     "#7EED56": 8,  # lighter green
-//     "#2450A4": 12,  # darkest blue
-//     "#3690EA": 13,  # medium normal blue
-//     "#51E9F4": 14,  # cyan
-//     "#811E9F": 18,  # darkest purple
-//     "#B44AC0": 19,  # normal purple
-//     "#FF99AA": 23,  # pink
-//     "#9C6926": 25,  # brown
-//     "#000000": 27,  # black
-//     "#898D90": 29,  # grey
-//     "#D4D7D9": 30,  # light grey
-//     "#FFFFFF": 31,  # white
-// }
 
-// name_map = {
-//     2: "Bright Red",
-//     3: "Orange",
-//     4: "Yellow",
-//     6: "Dark Green",
-//     8: "Light Green",
-//     12: "Dark Blue",
-//     13: "Blue",
-//     14: "Cyan",
-//     18: "Dark Purple",
-//     19: "Purple",
-//     23: "Pink",
-//     25: "Brown",
-//     27: "Black",
-//     29: "Grey",
-//     30: "Light Grey",
-//     31: "White",
-// }
-
-
-
-fn main() {
-    println!("Hello, world!");
+#[tokio::main]
+async fn main() {
+    /*
+        Log into reddit account and add refresh token to a table
+        Place pixel
+        wait 5:10 to 5:30 minutes to combat anti-bot
+    
+    */
+    let worker = Worker::new(String::from(""),String::from("0x0112"),String::from("7r?w7Jazp-FU[R^"),String::from(""),12574689, String::from("fdaW7SfgARsWGKIXo3awjw"),String::from("i5vLrD3rPBGMKGrBO51wUbYJs5Yunw"),245234523 );
+    worker.refresh_token().await;
 }

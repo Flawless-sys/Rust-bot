@@ -1,0 +1,18 @@
+{
+    "thread_delay": 2,
+    "workers": 
+    {
+      "WorkerName1": 
+      {
+        "password": "Password",
+        "client_id": "ClientID",
+        "client_secret": "ClientSecret"
+      },
+      "WorkerName2": 
+      {
+        "password": "Password",
+        "client_id": "ClientID",
+        "client_secret": "ClientSecret"
+      }
+    }
+  }
