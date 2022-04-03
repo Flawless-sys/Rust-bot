@@ -1,3 +1,4 @@
+use std::fs;
 use std::{collections::HashMap, thread::AccessError};
 use serde;
 use serde::{Deserialize, Serialize};
@@ -77,9 +78,9 @@ impl Worker {
         secret_key: String,
         place_in: usize,
 
-    ) -> Worker {
+    ) -> Self {
 
-        Worker {
+        Self {
             token: token, 
             username: username,
             password: password,
@@ -176,16 +177,33 @@ impl Pixel {
 
 
 
+fn task(Workers: Vec::<Worker>) {
+
+
+    loop {
+        
+    }
+
+    
+}
+
 
 
 #[tokio::main]
 async fn main() {
+    let data = fs::read_to_string("config.json").expect("Unable to read file");
+    let res: serde_json::Value = serde_json::from_str(&data).expect("Unable to parse");
+    println!("{}", res);
+  
     /*
         Log into reddit account and add refresh token to a table
         Place pixel
         wait 5:10 to 5:30 minutes to combat anti-bot
-    
     */
-    let worker = Worker::new(String::from(""),String::from("0x0112"),String::from("7r?w7Jazp-FU[R^"),String::from(""),12574689, String::from("fdaW7SfgARsWGKIXo3awjw"),String::from("i5vLrD3rPBGMKGrBO51wUbYJs5Yunw"),245234523 );
-    worker.refresh_token().await;
+
+
+
+
+    // let worker = Worker::new(String::from(""),String::from("0x0112"),String::from("^"),String::from(""),12574689, String::from("fdaW7SfgARsWGKIXo3awjw"),String::from("i5vLrD3rPBGMKGrBO51wUbYJs5Yunw"),245234523 );
+    // worker.refresh_token().await;
 }
